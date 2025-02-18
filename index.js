@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./Database/config.js";
 import authRoute from "./Routers/authRouter.js";
 import questionRoute from "./Routers/questionRouter.js";
+import resultRoute from "./Routers/resultRouter.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ connectDB();
 
 app.use("/api/auth",authRoute);
 app.use("/api/question",questionRoute);
+app.use("/api/result",resultRoute);
 
 app.get("/",(req,res)=>{
     res.send("Welcome to the Api");

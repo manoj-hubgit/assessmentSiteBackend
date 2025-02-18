@@ -1,5 +1,6 @@
 import Question from "../Models/questionSchema.js";
 
+
 export const addQuestion = async (req, res) => {
   const { collectionName, password, questionText, options, correctAnswer } =
     req.body;
@@ -9,9 +10,9 @@ export const addQuestion = async (req, res) => {
     !questionText ||
     !options ||
     !correctAnswer ||
-    options.length > 2
+    options.length !== 4
   ) {
-    return res.status(400), json({ message: "All Fields are Required" });
+    return res.status(400).json({ message: "All Fields are Required" });
   }
   if (!options.includes(correctAnswer)) {
     return res
@@ -54,58 +55,43 @@ export const getQuestionByCollection= async(req,res)=>{
 export const getAllCollectionNames= async(req,res)=>{
     try {
         const collections = await Question.distinct("collectionName");
+        if (collections.length === 0) {
+          return res.status(404).json({ message: "No collections found." });
+        }
         res.status(200).json({collections:collections})
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
-// export const getQuestions = async (req, res) => {
-//   try {
-//     const questions = await Question.find();
-//     res
-//       .status(200)
-//       .json({
-//         message: "Questions retrived Successfully",
-//         questions: questions,
-//       });
-//   } catch (error) {
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
-
-export const updateQuestion = async (req, res) => {
-  const { id } = req.params;
-  const { questionText, options, correctAnswer } = req.body;
-
+export const verifyPasskey = async (req, res) => {
+  const { passkey } = req.body;
   try {
-    const updatedQuestion = await Question.findByIdAndUpdate(
-      id,
-      { questionText, options, correctAnswer },
-      { new: text }
-    );
-
-    if (!updateQuestion) {
-      return res.status(404).json({ message: "Question not found" });
+    const collection = await Question.findOne({ password: passkey });
+    if (!collection) {
+      return res.status(400).json({ success: false, message: "Invalid Passkey" });
     }
-    res
-      .status(200)
-      .json({ message: "Question updated successfully", updatedQuestion });
+
+    const collectionName = collection.collectionName;
+    const questions = await Question.find({ collectionName });
+
+    res.status(200).json({ success: true, collectionName, questions });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-export const deleteQuestion = async (req, res) => {
-  const { id } = req.params;
+
+export const deleteCollection = async (req, res) => {
+  const { collectionName } = req.params;
 
   try {
-    const deleteQuestion = await Question.findByIdAndDelete(id);
-    if (!deleteQuestion) {
-      return res.status(404).json({ message: "Question not found" });
-    }
-    res.status(200).json({ message: "Question deleted successfully" });
+      const deletedQuestions = await Question.deleteMany({ collectionName });
+      if (deletedQuestions.deletedCount === 0) {
+          return res.status(400).json({ message: "Collection not found" });
+      }
+      res.status(200).json({ message: "Collection deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ message: "Internal Server Error" });
   }
 };

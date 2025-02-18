@@ -1,12 +1,12 @@
 import express from "express";
-import { addQuestion, deleteQuestion, getAllCollectionNames, getQuestionByCollection, updateQuestion } from "../Controllers/questionController.js";
+import { addQuestion, deleteCollection, getAllCollectionNames, getQuestionByCollection,verifyPasskey } from "../Controllers/questionController.js";
 
 const router= express.Router();
 
-router.post("/add",addQuestion);
+router.post("/addQuestion",addQuestion);
 router.post("/getQuestion",getQuestionByCollection);
 router.get("/collectionsName",getAllCollectionNames);
-router.put("updateQuestion/:id",updateQuestion);
-router.delete("deleteQuestion/:id",deleteQuestion);
+router.post("/verify-passkey",verifyPasskey);
+router.delete("/deleteCollection/:collectionName",deleteCollection);
 
 export default router;
